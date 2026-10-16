@@ -1,0 +1,16 @@
+[project]
+name = "ptworlddownloadfix"
+version = "1.0"
+description = "Simple script to fix to fix PT worlds downloaded from the version history"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+  "click>=8.5.0",
+]
+
+[tool.basedpyright]
+typeCheckingMode = "standard"
+pythonVersion = "3.13.0"
+
+[tool.ruff]
+line-length = 79

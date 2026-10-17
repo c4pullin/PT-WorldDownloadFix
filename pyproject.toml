@@ -1,7 +1,7 @@
 [project]
 name = "ptworlddownloadfix"
 version = "1.1"
-description = "Simple script to fix to fix PT worlds downloaded from the version history"
+description = "Simple script to fix PT worlds downloaded from the version history"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [

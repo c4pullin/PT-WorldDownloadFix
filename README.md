@@ -1,6 +1,6 @@
 # PT World Download Fixer
 
-Simple script to fix to fix polytoria worlds downloaded from the version history
+Simple script to fix polytoria worlds downloaded from the version history
 
 Works and tested on linux, don't know how if it works on other operating systems :>
 

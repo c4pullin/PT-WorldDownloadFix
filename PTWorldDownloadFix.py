@@ -88,9 +88,7 @@ def main(file: Path, output: Path) -> None:
         )
         return
 
-    try:
-        _ = script_references.pop("world_main.poly")
-    except KeyError:
+    if not script_references.pop("world_main.poly", None):
         click.secho("Didn't find world_main.poly in index.json!", fg="red")
         return
 

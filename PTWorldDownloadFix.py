@@ -63,6 +63,24 @@ def main(file: Path, output: Path) -> None:
     else:
         click.echo(f"Unzipped {file.name}")
 
+    directories_num = sum(1 for _ in output.iterdir())
+    if directories_num == 1:
+        posssible_path = next(output.iterdir(), None)
+        if not posssible_path:
+            click.secho("Something is wrong with your .poly file!", fg="red")
+            return
+
+        click.secho(
+            "There was only 1 folder inside, moving to "
+            + f"{output / posssible_path}",
+            fg="yellow",
+        )
+        output = posssible_path
+
+    elif directories_num == 0:
+        click.secho("Your .poly file was empty!", fg="red")
+        return
+
     search = next(output.rglob("meta.json"), None)
     if not search:
         click.secho("Could not find the meta.json file!", fg="red")

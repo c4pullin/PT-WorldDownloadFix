@@ -27,11 +27,10 @@ def show_adding_meta(location: Path | None) -> str | None:
 def main(file: Path, output: Path) -> None:
     """Cause Polytoria wouldn't fix it themselves :("""
     if file.suffix != ".poly":
-        click.secho(
+        return click.secho(
             "Are you sure you selected the correct .poly file you got?",
             fg="red",
         )
-        return
 
     if output.exists() and next(output.iterdir(), None) != None:
         prompt_result = click.prompt(
@@ -42,8 +41,7 @@ def main(file: Path, output: Path) -> None:
         )
 
         if not prompt_result:
-            click.secho("Conversion cancelled.", fg="magenta")
-            return
+            return click.secho("Conversion cancelled.", fg="magenta")
 
     try:
         with zipfile.ZipFile(file, "r") as zip:
@@ -57,16 +55,16 @@ def main(file: Path, output: Path) -> None:
                 for info in zip_infos:
                     _ = zip.extract(info, output)
                     bar.update(info.file_size, info)
+                bar.current_item = None
+                bar.render_progress()
     except zipfile.BadZipFile:
         click.secho("Is your file corrupted? Not possible to unzip!", fg="red")
         return
     else:
         click.echo(f"Unzipped {file.name}")
 
-    directories_num = sum(1 for _ in output.iterdir())
-    if directories_num == 1:
-        posssible_path = next(output.iterdir(), None)
-        if not posssible_path:
+    if (directories_num := sum(1 for _ in output.iterdir())) == 1:
+        if not (posssible_path := next(output.iterdir(), None)):
             click.secho("Something is wrong with your .poly file!", fg="red")
             return
 
@@ -78,21 +76,17 @@ def main(file: Path, output: Path) -> None:
         output = posssible_path
 
     elif directories_num == 0:
-        click.secho("Your .poly file was empty!", fg="red")
-        return
+        return click.secho("Your .poly file was empty!", fg="red")
 
-    search = next(output.rglob("meta.json"), None)
-    if not search:
+    if not (search := next(output.rglob("meta.json"), None)):
         click.secho("Could not find the meta.json file!", fg="red")
         return
     _ = search.rename(search.with_name("project.ptproj"))
 
     click.echo("Renamed meta.json -> project.ptproj")
 
-    references = next(output.rglob("index.json"), None)
-    if not references:
-        click.secho("index.json wasn't present!", fg="red")
-        return
+    if not (references := next(output.rglob("index.json"), None)):
+        return click.secho("index.json wasn't present!", fg="red")
 
     click.echo("Found index.json, file references will be fixed next.")
 
@@ -101,10 +95,9 @@ def main(file: Path, output: Path) -> None:
             references.read_bytes(), type=dict[str, str]
         )
     except msgspec.DecodeError as e:
-        click.secho(
+        return click.secho(
             f"index.json didn't have the expected format!\n{e}", fg="red"
         )
-        return
 
     if not script_references.pop("world_main.poly", None):
         click.secho("Didn't find world_main.poly in index.json!", fg="red")
@@ -120,6 +113,8 @@ def main(file: Path, output: Path) -> None:
             meta_file = output.joinpath(location).with_suffix(".luau.meta")
             _ = meta_file.write_bytes(encoder.encode({"id": id}))
             bar.update(1, meta_file)
+        bar.current_item = None
+        bar.render_progress()
 
     references.unlink()
 
